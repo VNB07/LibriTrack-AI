@@ -9,6 +9,7 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /app
 COPY backend/ ./backend/
 COPY ml/ ./ml/
+COPY frontend/ ./frontend/
 
 RUN pip install --no-cache-dir -r backend/requirements.txt && \
     pip install --no-cache-dir --no-deps face_recognition==1.3.0
