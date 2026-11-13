@@ -10,7 +10,8 @@ WORKDIR /app
 COPY backend/ ./backend/
 COPY ml/ ./ml/
 
-RUN pip install --no-cache-dir -r backend/requirements.txt
+RUN pip install --no-cache-dir -r backend/requirements.txt && \
+    pip install --no-cache-dir --no-deps face_recognition==1.3.0
 
 ENV PYTHONPATH=/app
 WORKDIR /app/backend
