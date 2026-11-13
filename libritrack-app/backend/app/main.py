@@ -13,16 +13,20 @@ from app.routes import router  # noqa: E402
 
 app = FastAPI(title="LibriTrack-AI")
 @app.on_event("startup")
+@app.on_event("startup")
 def ensure_admin_password():
     import sqlite3
+    from werkzeug.security import generate_password_hash
     try:
         conn = sqlite3.connect("libritrack.db")
+        hashed_pw = generate_password_hash("admin123")
         conn.execute(
             "UPDATE staff SET password = ? WHERE email = ?",
-            ("pbkdf2:sha256:600000$5dc6c8b77a093b69cc6d01ba3040e6ab$5fe7bc50f0cf25fb193f1733fc3b47179b00ad1786990212621182f98799acca", "admin@library.test")
+            (hashed_pw, "admin@library.test")
         )
         conn.commit()
         conn.close()
+        print("Admin password successfully reset to admin123")
     except Exception as e:
         print("Admin password sync note:", e)
 init()
