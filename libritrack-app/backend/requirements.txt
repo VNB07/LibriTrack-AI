@@ -9,3 +9,4 @@ Pillow
 Click
 dlib-bin==20.0.1.post1
 face_recognition_models==0.3.0
+Werkzeug
