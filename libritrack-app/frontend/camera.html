@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LibriTrack-AI Live camera</title>
+  <link rel="stylesheet" href="css/style.css?v=4">
+  <style>
+    .mode-toggle {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .mode-btn {
+      padding: 10px 18px;
+      border: 2px solid #0284c7;
+      background: white;
+      color: #0284c7;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    .mode-btn.active {
+      background: #0284c7;
+      color: white;
+    }
+    .kiosk-status {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      color: #166534;
+      padding: 12px 16px;
+      border-radius: 6px;
+      margin-bottom: 12px;
+      font-size: 1.05rem;
+    }
+    .kiosk-status.step2 {
+      background: #eff6ff;
+      border-color: #bfdbfe;
+      color: #1e40af;
+    }
+    .kiosk-status.success {
+      background: #fefce8;
+      border-color: #fef08a;
+      color: #854d0e;
+      font-weight: bold;
+    }
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 10px;
+      font-size: 0.85rem;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .legend-box {
+      width: 14px;
+      height: 14px;
+      border-radius: 3px;
+    }
+  </style>
+</head>
+<body>
+<header>
+  <h1>LibriTrack-AI</h1>
+  <span id="who"></span>
+  <button id="logout" class="ghost">Log out</button>
+</header>
+<main>
+  <nav>
+    <a class="tab" href="index.html#dashboard">Dashboard & Live Inside</a>
+    <a class="tab active" href="camera.html">Live Camera Kiosk</a>
+    <a class="tab" href="index.html#loansView">Active Book Loans</a>
+    <a class="tab" href="index.html#students">Registered Students</a>
+    <a class="tab" href="index.html#books">Book Inventory</a>
+    <a class="tab" href="index.html#uploads">My Uploads</a>
+  </nav>
+
+  <section class="card">
+    <div class="mode-toggle">
+      <button id="btnModeAttendance" class="mode-btn active" type="button">Attendance Mode</button>
+      <button id="btnModeBorrow" class="mode-btn" type="button">Borrow Books Mode</button>
+    </div>
+
+    <!-- Borrow Mode Guided Banner -->
+    <div id="borrowBanner" class="kiosk-status" style="display:none;">
+      <span id="borrowStepText">Step 1: Stand in front of camera to verify identity</span>
+      <button id="btnResetBorrow" class="ghost" style="display:none; padding:4px 8px; font-size:0.85rem;">Reset / Change Student</button>
+    </div>
+
+    <!-- Attendance Legend -->
+    <div id="attendanceLegend" class="legend">
+      <div class="legend-item"><span class="legend-box" style="background:#1f8a4c;"></span> Enrolled Student (Entry Logged)</div>
+      <div class="legend-item"><span class="legend-box" style="background:#b54708;"></span> Unknown Face</div>
+    </div>
+
+    <div style="margin-top: 14px;">
+      <button id="camBtn" type="button">Turn on camera</button>
+    </div>
+
+    <div class="stage" style="margin-top: 12px;">
+      <video id="camVideo" autoplay muted playsinline></video>
+      <canvas id="overlay"></canvas>
+    </div>
+    <p id="camMsg" class="msg"></p>
+  </section>
+</main>
+<script src="js/api.js?v=4"></script>
+<script src="js/camera.js?v=4"></script>
+</body>
+</html>

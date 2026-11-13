@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LibriTrack-AI</title>
+  <link rel="stylesheet" href="css/style.css?v=4">
+  <style>
+    .snapshot-thumb {
+      width: 52px;
+      height: 38px;
+      object-fit: cover;
+      border-radius: 4px;
+      cursor: pointer;
+      border: 1px solid #cbd5e1;
+      transition: transform 0.15s ease;
+    }
+    .snapshot-thumb:hover {
+      transform: scale(1.1);
+    }
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.75);
+      align-items: center;
+      justify-content: center;
+    }
+    .modal.active {
+      display: flex;
+    }
+    .modal img {
+      max-width: 90%;
+      max-height: 85%;
+      border-radius: 6px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.6);
+    }
+    .modal-close {
+      position: absolute;
+      top: 20px;
+      right: 25px;
+      color: white;
+      font-size: 32px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .badge-in {
+      background: #dcfce7;
+      color: #15803d;
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 0.8rem;
+    }
+    .badge-out {
+      background: #f1f5f9;
+      color: #64748b;
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-size: 0.8rem;
+    }
+  </style>
+</head>
+<body>
+<header>
+  <h1>LibriTrack-AI</h1>
+  <span id="who"></span>
+  <button id="logout" class="ghost" hidden>Log out</button>
+</header>
+
+<section id="login" class="card narrow">
+  <h2>Staff login</h2>
+  <form id="loginForm">
+    <input name="email" type="email" placeholder="Email" required>
+    <input name="password" type="password" placeholder="Password" required>
+    <button type="submit">Log in</button>
+  </form>
+  <p id="loginMsg" class="msg"></p>
+</section>
+
+<main id="app" hidden>
+  <nav>
+    <button class="tab active" data-view="dashboard">Dashboard & Live Inside</button>
+    <a class="tab" href="camera.html">Live Camera Kiosk</a>
+    <button class="tab" data-view="loansView">Active Book Loans</button>
+    <button class="tab" data-view="students">Registered Students</button>
+    <button class="tab" data-view="books">Book Inventory</button>
+    <button class="tab" data-view="uploads">My Uploads</button>
+  </nav>
+
+  <!-- 1. DASHBOARD: STATS + CURRENTLY INSIDE + LIVE LOG -->
+  <section id="dashboard" class="view active">
+    <div class="stats" id="stats"></div>
+
+    <div class="card">
+      <h2>Students Currently Inside Library <span class="live">&#9679; live</span></h2>
+      <p class="hint">Real-time list of students who entered and have not exited.</p>
+      <div id="insideStudentsList"><p class="hint">Loading currently present students...</p></div>
+    </div>
+
+    <div class="card">
+      <h2>Live Entry & Exit Activity</h2>
+      <div id="nameLog"><p class="hint">Loading...</p></div>
+    </div>
+
+    <div class="card">
+      <h2>Manual Entry or Exit Fallback</h2>
+      <p class="hint">Manually log a student without face recognition.</p>
+      <form id="manualForm">
+        <select name="student_id" class="studentSelect" required></select>
+        <select name="kind"><option value="entry">Entry</option><option value="exit">Exit</option></select>
+        <button type="submit">Record</button>
+      </form>
+      <p id="manualMsg" class="msg"></p>
+    </div>
+  </section>
+
+  <!-- 2. ACTIVE LOANS: WHO BORROWED WHAT -->
+  <section id="loansView" class="view">
+    <div class="card">
+      <h2>Who Borrowed Which Book (Active Loans)</h2>
+      <p class="hint">All books currently out on loan, linked to the student with checkout timestamp and security audit snapshots.</p>
+      <div id="loanList"><p class="hint">Loading loans...</p></div>
+    </div>
+
+    <div class="card">
+      <h2>Unattended Books Spotted <span class="hint">(Librarian Review Queue)</span></h2>
+      <div id="unattendedList"></div>
+    </div>
+
+    <div class="card">
+      <h2>Manual Checkout & Return</h2>
+      <form id="checkoutForm">
+        <input name="barcode" placeholder="Book barcode" required>
+        <select name="student_id" class="studentSelect" required></select>
+        <button type="submit">Checkout</button>
+      </form>
+      <form id="returnForm" style="margin-top:10px;">
+        <input name="barcode" placeholder="Book barcode to return" required>
+        <button type="submit" class="ghost">Return Book</button>
+      </form>
+      <p id="loanMsg" class="msg"></p>
+    </div>
+  </section>
+
+  <!-- 3. STUDENTS DIRECTORY -->
+  <section id="students" class="view">
+    <div class="card">
+      <h2>Add Student</h2>
+      <form id="addStudentForm">
+        <input name="code" placeholder="Student ID (e.g. 25071A6767)" required>
+        <input name="name" placeholder="Full name" required>
+        <input name="email" type="email" placeholder="Email (optional)">
+        <label class="check"><input name="consent" type="checkbox" required>
+          The student has agreed to face recognition and loan audit snapshots</label>
+        <button type="submit">Add student</button>
+      </form>
+      <p id="addStudentMsg" class="msg"></p>
+    </div>
+
+    <div class="card">
+      <h2>Enroll Face Photo</h2>
+      <p class="hint">Upload a clear portrait to activate face recognition for this student.</p>
+      <form id="uploadForm">
+        <select name="student_id" class="studentSelect" required></select>
+        <input name="file" type="file" accept="image/*" required>
+        <button type="submit">Upload Face</button>
+      </form>
+      <p id="uploadMsg" class="msg"></p>
+    </div>
+
+    <div class="card">
+      <h2>All Registered Students</h2>
+      <div id="studentList"></div>
+    </div>
+  </section>
+
+  <!-- 4. BOOK INVENTORY -->
+  <section id="books" class="view">
+    <div class="card">
+      <h2>Add Book to Inventory</h2>
+      <form id="addBookForm">
+        <input name="barcode" placeholder="Barcode" required>
+        <input name="title" placeholder="Title" required>
+        <input name="author" placeholder="Author">
+        <input name="copies" type="number" min="1" value="1">
+        <label class="hint" style="display:block; margin-top:8px;">Cover photo (enables visual Borrow Mode recognition):</label>
+        <input name="cover" type="file" accept="image/*">
+        <button type="submit">Add book</button>
+      </form>
+      <p id="bookMsg" class="msg"></p>
+    </div>
+
+    <div class="card">
+      <h2>Book Catalog</h2>
+      <div id="bookList"></div>
+    </div>
+  </section>
+
+  <!-- 5. UPLOADS -->
+  <section id="uploads" class="view">
+    <div class="card">
+      <h2>Face Photos Uploaded by You</h2>
+      <div id="myPhotos"></div>
+    </div>
+  </section>
+</main>
+
+<!-- Snapshot Preview Modal -->
+<div id="imageModal" class="modal" onclick="closeModal()">
+  <span class="modal-close">&times;</span>
+  <img id="modalImg" src="" alt="Audit Snapshot" onclick="event.stopPropagation()">
+</div>
+
+<script src="js/api.js?v=4"></script>
+<script src="js/app.js?v=4"></script>
+</body>
+</html>
